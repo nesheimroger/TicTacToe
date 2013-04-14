@@ -85,21 +85,17 @@ io.sockets.on('connection', function (socket) {
             console.log(data);
             for( var i in competitions){
                 if(competitions[i].id == data.competitionId){
-                    console.log("competition found");
                     if(competitions[i].turn == socket.id){
-                        console.log("correct turn");
                         var tag;
                         var nextTurn;
                         switch(socket.id){
                             case competitions[i].playerOne.socketid:
                                 tag = "X";
                                 nextTurn = competitions[i].playerTwo.socketid;
-                                console.log("Tag: X");
                                 break;
                             case competitions[i].playerTwo.socketid:
                                 tag = "O";
                                 nextTurn = competitions[i].playerOne.socketid;
-                                console.log("Tag: O");
                                 break;
                             default:
                                 return;
@@ -145,16 +141,10 @@ io.sockets.on('connection', function (socket) {
                            competition: competitions[i]
                         });
 
-                        console.log(nextTurn);
-
                         io.sockets.sockets[nextTurn].emit('tile_click_accepted',{
                             competition: competitions[i]
                         });
-
-
-
                     }
-                    console.log("wrong turn")
                 }
             }
 
@@ -164,14 +154,16 @@ io.sockets.on('connection', function (socket) {
 
     socket.on("close", function() {
         // request closed unexpectedly
-
+        console.log("close" + socket.id);
+        User.Remove(socket.id);
 
 
     });
 
     socket.on("end", function() {
         // request ended normally
-
+        User.Remove(socket.id);
+        console.log("end" + socket.id)
 
     });
 
@@ -202,5 +194,25 @@ var Guid = {
         return (S4() + S4() + "-" + S4() + "-4" + S4().substr(0,3) + "-" + S4() + "-" + S4() + S4() + S4()).toLowerCase();
     }
 };
+
+var User = {
+    Remove: function(socketid){
+        for(var i in usersWaiting){
+            if(usersWaiting[i],socketid == socketid){
+                usersWaiting.splice(i, 1);
+                return;
+            }
+        }
+
+        for (var i in competitions){
+            if(competitions[i].playerOne == socketid){
+                io.sockets.sockets[competitions[i],playerTwo].emit('opponent_left', {message: "Opponent left"});
+            }else if(competitions[i].playerTwo == socketid){
+                io.sockets.sockets[competitions[i],playerOne].emit('opponent_left', {message: "Opponent left"});
+            }
+
+        }
+    }
+}
 
 

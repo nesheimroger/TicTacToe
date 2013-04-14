@@ -63,12 +63,6 @@
             </fieldset>
         </section>
         <section class="game">
-
-            <input type="hidden" id="competitionId" value=""/>
-            <input type="hidden" id="playerId" value=""/>
-            <input type="hidden" id="turn" value=""/>
-            <input type="hidden" id="opponentName" value=""/>
-
             <div class="row">
                 <div class="col" id="11"></div>
                 <div class="col" id="12"></div>
@@ -85,6 +79,11 @@
                 <div class="col" id="33"></div>
             </div>
         </section>
+
+        <input type="hidden" id="competitionId" value=""/>
+        <input type="hidden" id="playerId" value=""/>
+        <input type="hidden" id="turn" value=""/>
+        <input type="hidden" id="opponentName" value=""/>
     </div>
   <script>
     var socket = io.connect('http://localhost');
@@ -111,6 +110,11 @@
         $('#turn').val(data.competition.turn);
         updateGame(data.competition.status);
     });
+
+    socket.on('opponent_left', function(data){
+        $('.game').hide();
+        $('.message').html(data.message);
+    })
 
     function startGame(data){
         $('.message').html(data.message);
