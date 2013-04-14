@@ -1,0 +1,17 @@
+{
+    "name": "TicTacToe",
+    "version": "0.0.0",
+    "dependencies": {
+	"express": "*",
+	"socket.io": "*",
+	"socket.io-client": "*",
+    "jquery": "*"
+    },
+    "devDependencies": {
+	"mocha": "*",
+	"supertest": "*"
+    },
+    "scripts": {
+	"test": "mocha test.js -R spec"
+    }
+}

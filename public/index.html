@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<head>
+    <title>Tic Tac Toe</title>
+    <style>
+        .container{
+            width: 500px;
+            margin: 50px auto;
+        }
+
+        .game, .username{
+            display: none;
+        }
+
+        .game{
+            width: 303px;
+            margin: 50px auto;
+        }
+
+        .row{
+            width: 302px;
+            height: 101px;
+        }
+
+        .col{
+            float: left;
+            width: 100px;
+            height: 100px;
+            border-left: 1px solid #000000;
+            line-height: 100px;
+            text-align: center;
+            font-size: 50px;
+            text-transform: uppercase;
+        }
+        .col:first-child{
+            border-left: none;
+        }
+        .row{
+            border-top: 1px solid #000000;
+        }
+        .row:first-child{
+            border-top: none;
+        }
+
+
+
+    </style>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Tic Tac Toe</h1>
+            <p class="message"></p>
+        </header>
+        <section class="username">
+            <fieldset>
+                <legend>Get started</legend>
+                <label for="username">Name:</label>
+                <input type='text' id="username" name='username'/>
+                <input type='button' value="OK" class="submit" />
+            </fieldset>
+        </section>
+        <section class="game">
+
+            <input type="hidden" id="competitionId" value=""/>
+            <input type="hidden" id="playerId" value=""/>
+            <input type="hidden" id="turn" value=""/>
+            <input type="hidden" id="opponentName" value=""/>
+
+            <div class="row">
+                <div class="col" id="11"></div>
+                <div class="col" id="12"></div>
+                <div class="col" id="13"></div>
+            </div>
+            <div class="row">
+                <div class="col" id="21"></div>
+                <div class="col" id="22"></div>
+                <div class="col" id="23"></div>
+            </div>
+            <div class="row">
+                <div class="col" id="31"></div>
+                <div class="col" id="32"></div>
+                <div class="col" id="33"></div>
+            </div>
+        </section>
+    </div>
+  <script>
+    var socket = io.connect('http://localhost');
+
+    socket.on('connected', function (data) {
+        $('.message').html(data.message);
+        $('.username').show();
+    });
+
+    socket.on('username_accepted_waiting', function(data){
+        $('.message').html(data.message);
+        $('.username').hide();
+    });
+
+    socket.on('username_accepted_compete', function(data){
+        startGame(data);
+    });
+
+    socket.on('opponent_found', function(data){
+        startGame(data);
+    });
+
+    socket.on('tile_click_accepted', function(data){
+        $('#turn').val(data.competition.turn);
+        updateGame(data.competition.status);
+    });
+
+    function startGame(data){
+        $('.message').html(data.message);
+        $('#competitionId').val(data.competition.id);
+        $('#playerId').val(data.playerId);
+        $('#opponentName').val(data.opponentName);
+        $('#turn').val(data.competition.turn);
+        $('.username').hide();
+        $('.game').show();
+
+        $('.col').on('click', function(){
+
+            if($('#turn').val() == data.playerId && $(this).html() == ""){
+                var tile = $(this).attr('id');
+                var competitionId = $('#competitionId').val();
+                socket.emit('tile_clicked', {
+                    tile: tile,
+                    competitionId: competitionId
+                })
+            }
+        });
+
+
+    }
+
+    function updateGame(status){
+        $('#11').html(status.tileOne);
+        $('#12').html(status.tileTwo);
+        $('#13').html(status.tileThree);
+        $('#21').html(status.tileFour);
+        $('#22').html(status.tileFive);
+        $('#23').html(status.tileSix);
+        $('#31').html(status.tileSeven);
+        $('#32').html(status.tileEight);
+        $('#33').html(status.tileNine);
+    }
+
+
+
+    $('.submit').on('click', function(){
+        var name = $('#username').val();
+
+        if(name !== ""){
+            socket.emit('username_submitted', { username: name });
+        }
+    });
+
+  </script>
+</body>
